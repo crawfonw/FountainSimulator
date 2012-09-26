@@ -105,7 +105,7 @@ class Animation(PygameHelper):
 
     def draw_xz_droplet(self, oldpos, newpos, rgb=(0,0,255)):
         pygame.draw.circle(self.screen, (255,255,255), self.translate_xz_pos_to_screen(oldpos).inttup(), self.radius)
-        pygame.draw.circle(self.screen, (newpos.y*10,0,255-newpos.y*10), self.translate_xz_pos_to_screen(newpos).inttup(), self.radius)
+        pygame.draw.circle(self.screen, (min(newpos.y*10, 255),0,max(255-newpos.y*10, 0)), self.translate_xz_pos_to_screen(newpos).inttup(), self.radius)
         
     def draw_xz_axis(self):
         aFont = pygame.font.Font(None, 16)
@@ -157,7 +157,7 @@ class Animation(PygameHelper):
 
     def draw_xy_droplet(self, oldpos, newpos, rgb=(0,0,255)):
         pygame.draw.circle(self.screen, (255,255,255), self.translate_xy_pos_to_screen(oldpos).inttup(), self.radius)
-        pygame.draw.circle(self.screen, (newpos.y*10,0,255-newpos.y*10), self.translate_xy_pos_to_screen(newpos).inttup(), self.radius)
+        pygame.draw.circle(self.screen, (min(newpos.y*10, 255),0,max(255-newpos.y*10, 0)), self.translate_xy_pos_to_screen(newpos).inttup(), self.radius)
         
     def update_x_wind(self):
         wind_did_change = False
@@ -269,8 +269,12 @@ class Animation(PygameHelper):
 
 
 if __name__ == '__main__':
-    width = 1300
-    height = 800
-    initial_vel = 100
-    s = Animation(width, height, initial_vel)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-W", type=int, help="Width of window", default=1300)
+    parser.add_argument("-H", type=int, help="Height of window", default=800)
+    parser.add_argument("-V", type=int, help="Initial velocity in the Y direction", default=100)
+    args = parser.parse_args()
+    
+    s = Animation(args.W, args.H, args.V)
     s.mainLoop(60)
