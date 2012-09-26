@@ -124,13 +124,19 @@ class Animation(PygameHelper):
         if self.wind_enabled['n']:
             self.wn.duration -= self.dt
             if self.wn.duration <= 0:
-                self.wn = Wind(uniform(0, 2), float(randint(15, 20)))
+                if randint(0, 9) == 5:
+                    self.wn = Wind(uniform(6, 8), float(randint(2, 4)))
+                else:
+                    self.wn = Wind(uniform(0, 2), float(randint(15, 20)))
                 self.redraw_wind_label('n')
                 wind_did_change = True
         if self.wind_enabled['s']:
             self.ws.duration -= self.dt
             if self.ws.duration <= 0:
-                self.ws = Wind(-uniform(0, 2), float(randint(15, 20)))
+                if randint(0, 9) == 5:
+                    self.ws = Wind(uniform(6, 8), float(randint(2, 4)))
+                else:
+                    self.ws = Wind(-uniform(0, 2), float(randint(15, 20)))
                 self.redraw_wind_label('s')
                 wind_did_change = True
 
@@ -165,13 +171,19 @@ class Animation(PygameHelper):
         if self.wind_enabled['e']:
             self.we.duration -= self.dt
             if self.we.duration <= 0:
-                self.we = Wind(uniform(0, 2), float(randint(15, 20)))
+                if randint(0, 9) == 5:
+                    self.we = Wind(uniform(6, 8), float(randint(2, 4)))
+                else:
+                    self.we = Wind(uniform(0, 2), float(randint(15, 20)))
                 self.redraw_wind_label('e')
                 wind_did_change = True
         if self.wind_enabled['w']:
             self.ww.duration -= self.dt
             if self.ww.duration <= 0:
-                self.ww = Wind(-uniform(0, 2), float(randint(15, 20)))
+                if randint(0, 9) == 5:
+                    self.ww = Wind(uniform(6, 8), float(randint(2, 4)))
+                else:
+                    self.ww = Wind(-uniform(0, 2), float(randint(15, 20)))
                 self.redraw_wind_label('w')
                 wind_did_change = True
                 
