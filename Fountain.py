@@ -73,7 +73,7 @@ class Animation(PygameHelper):
 
         #tick tock
         self.time = 0
-        self.dt = 0.05
+        self.dt = 0.03
         
         #initial velocities, etc.
         self.v = v
@@ -113,7 +113,7 @@ class Animation(PygameHelper):
         self.draw_xz_fountain()
         self.draw_xz_axis()
         
-        self.draw_buttons()
+        #self.draw_buttons()
         
         self.draw_lines()
         
@@ -140,7 +140,6 @@ class Animation(PygameHelper):
             self.screen.blit(self.wind_west_label, (10,50))
         else:
             raise ValueError
-            
         
     def draw_buttons(self):
         print 'Keys:\nN,S,E,W - Toggle N/S/E/W Winds\n'
@@ -153,7 +152,7 @@ class Animation(PygameHelper):
 #        pygame.draw.ellipse(self.screen, (150,150,150), (pos.x, pos.y, pos2.x, pos2.y))
     
     def translate_xz_pos_to_screen(self, pos):
-        return vec2d(7 * self.w / 9 + 30 * pos.x, 2 * self.h / 4 + 20 * (-pos.z))
+        return vec2d(7 * self.w / 9 + 30 * pos.x, 3 * self.h / 5 + 20 * (-pos.z))
 
     def draw_xz_droplet(self, oldpos, newpos, rgb=(0,0,255)):
         pygame.draw.circle(self.screen, (255,255,255), self.translate_xz_pos_to_screen(oldpos).inttup(), self.radius)
@@ -162,7 +161,7 @@ class Animation(PygameHelper):
     def draw_xz_axis(self):
         aFont = pygame.font.Font(None, 16)
         for i in range(-10, 11):
-            pos = self.translate_xz_pos_to_screen(vec3d(i,0,-12))
+            pos = self.translate_xz_pos_to_screen(vec3d(i,0,-11))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
             self.screen.blit(label, pos)
             
@@ -200,7 +199,7 @@ class Animation(PygameHelper):
             label = aFont.render('%s' % i, 1, (10, 10, 10))
             self.screen.blit(label, pos)
             
-            pos = self.translate_xy_pos_to_screen(vec3d(10,i,0))
+            pos = self.translate_xy_pos_to_screen(vec3d(-10,i,0))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
             self.screen.blit(label, pos) 
 
@@ -229,6 +228,15 @@ class Animation(PygameHelper):
                 
         return wind_did_change
 
+    def adjust_initial_droplet_velocity(self):
+        '''
+        This is the compensation algoritm. It adjusts the fountain's spray speed,
+        specifically the initial y-velocity of the droplets, so people don't get
+        sprayed.
+        '''
+        return
+            
+
     #pygame
     def update(self):
         self.draw_xz_fountain()
@@ -243,6 +251,9 @@ class Animation(PygameHelper):
         
         x_wind_did_change = self.update_x_wind()
         z_wind_did_change = self.update_z_wind()
+        
+        if x_wind_did_change or z_wind_did_change:
+            self.adjust_initial_droplet_velocity()
         
         if len(self.droplets) < self.max_drops:
             new_d = Droplet(uniform(-2, 2), self.v, uniform(-2, 2))
