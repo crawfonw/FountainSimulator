@@ -121,6 +121,11 @@ class Animation(PygameHelper):
         pygame.draw.line(self.screen, (0,0,0), (self.w / 2, 0), (self.w / 2, self.h))
         #pygame.draw.line(self.screen, (0,0,0), (0, self.h - 100), (self.w, self.h - 100))
         
+    def redraw_velocity_label(self):
+        pygame.draw.rect(self.screen, (255,255,255), (10, 10, self.w / 2 - 10, 20))
+        self.y_velocity_label = self.aFont.render('Initial y-velocity %s m/s' % self.v, 1, (10, 10, 10))
+        self.screen.blit(self.y_velocity_label, (10,10))
+        
     def redraw_wind_label(self, d):
         if d == 'n':
             pygame.draw.rect(self.screen, (255,255,255), (self.w / 2 + 10, 30, self.w - 10, 20))
@@ -234,6 +239,7 @@ class Animation(PygameHelper):
         specifically the initial y-velocity of the droplets, so people don't get
         sprayed.
         '''
+        self.redraw_velocity_label()
         return
             
 
