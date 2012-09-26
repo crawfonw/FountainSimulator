@@ -1,6 +1,16 @@
 import operator
 import math
- 
+
+class vec3d():
+
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def inttup(self):
+        return (int(self.x), int(self.y), int(self.z))
+
 class vec2d(object):
     """2d vector class, supports vector and scalar operators,
        and also provides a bunch of high level functions
