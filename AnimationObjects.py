@@ -64,7 +64,7 @@ class Animation(PygameHelper):
         self.draw_lines()
         
     def draw_lines(self):
-        pygame.draw.line(self.screen, (0,0,0), (self.w / 2, 0), (self.w / 2, self.h))
+        pygame.draw.line(self.screen, (0,0,0), (self.w / 2, 0), (self.w / 2, self.h), 2)
         #pygame.draw.line(self.screen, (0,0,0), (0, self.h - 100), (self.w, self.h - 100))
         
     def redraw_velocity_label(self):
@@ -100,7 +100,6 @@ class Animation(PygameHelper):
         pos = self.translate_xz_pos_to_screen(vec3d(0,0,0))
         pos2 = self.translate_xz_pos_to_screen(vec3d(2,0,4))
         pygame.draw.circle(self.screen, (150,150,150), (pos.x, pos.y), 30)
-#        pygame.draw.ellipse(self.screen, (150,150,150), (pos.x, pos.y, pos2.x, pos2.y))
     
     def translate_xz_pos_to_screen(self, pos):
         return vec2d(7 * self.w / 9 + 30 * pos.x, 3 * self.h / 5 + 20 * (-pos.z))
@@ -113,12 +112,16 @@ class Animation(PygameHelper):
         aFont = pygame.font.Font(None, 16)
         for i in range(-10, 11):
             pos = self.translate_xz_pos_to_screen(vec3d(i,0,-11))
+            pos2 = self.translate_xz_pos_to_screen(vec3d(i,0,11))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
             self.screen.blit(label, pos)
+            pygame.draw.line(self.screen, (0,0,0), pos, pos2)
             
             pos = self.translate_xz_pos_to_screen(vec3d(-11,0,i))
+            pos2 = self.translate_xz_pos_to_screen(vec3d(11,0,i))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
-            self.screen.blit(label, pos)            
+            self.screen.blit(label, pos)
+            pygame.draw.line(self.screen, (0,0,0), pos, pos2)
             
     def update_z_wind(self):
         wind_did_change = False
@@ -153,12 +156,16 @@ class Animation(PygameHelper):
         aFont = pygame.font.Font(None, 16)
         for i in range(-10, 11):
             pos = self.translate_xy_pos_to_screen(vec2d(i,-10))
+            pos2 = self.translate_xy_pos_to_screen(vec2d(i,10))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
             self.screen.blit(label, pos)
+            pygame.draw.line(self.screen, (0,0,0), pos, pos2)
             
             pos = self.translate_xy_pos_to_screen(vec3d(-10,i,0))
+            pos2 = self.translate_xy_pos_to_screen(vec3d(10,i,0))
             label = aFont.render('%s' % i, 1, (10, 10, 10))
-            self.screen.blit(label, pos) 
+            self.screen.blit(label, pos)
+            pygame.draw.line(self.screen, (0,0,0), pos, pos2)
 
     def translate_xy_pos_to_screen(self, pos):
         return vec2d(self.w / 4 + 30 * pos.x, 3 * self.h / 5 + 21 * (-pos.y))
@@ -191,45 +198,22 @@ class Animation(PygameHelper):
                 
         return wind_did_change
 
+    #fountain control algorithm
     def adjust_initial_droplet_velocity(self):
         
+        vt = 2.06
+        g = 9.8
+        target_dist = 5.0        
         droplet = self.construct_far_droplet(self.v)
-        self.v = Numerical.get_velocity(2.06, 9.8, droplet.xs, self.we, 5.0)
+
+        sew = self.we + self.ww
+        sns = self.wn + self.ws
+        x = Numerical.get_velocity(vt, g, droplet.xs, sew, (sew/abs(sew))*target_dist)
+        z = Numerical.get_velocity(vt, g, droplet.zs, sns, (sns/abs(sns))*target_dist)
+        self.v = min(x, z)
         
         self.redraw_velocity_label()
 
-    def adjust_initial_droplet_velocity2(self):
-        '''
-        This is the compensation algoritm. It adjusts the fountain's spray speed,
-        specifically the initial y-velocity of the droplets, so people don't get
-        sprayed.
-        '''
-        print 'Here'
-        max_xz_displacement = 3.0
-        droplet = self.construct_far_droplet(self.v)
-        best_guess = self.v
-        
-        x = max(abs(droplet.x(droplet.tx + 1.0, self.we, self.ww)), abs(droplet.x(droplet.tx + 5.0, self.we, self.ww)), abs(droplet.x(droplet.tx + 10.0, self.we, self.ww)))
-        z = droplet.z(droplet.tz, self.wn, self.ws)
-        
-        print x, z
-        
-        if abs(x) > max_xz_displacement or abs(z) > max_xz_displacement:
-            print 'In the if'
-            c = 50.0
-            while True:
-                y = droplet.y(droplet.ty + c)
-                print 'Loooop, y=', y, best_guess
-                if y > 5.0:
-                    best_guess *= 0.75
-                    droplet = self.construct_far_droplet(best_guess)
-                    c -= 1.0
-                else:
-                    break
-        
-        self.v = best_guess
-        self.redraw_velocity_label()
-    
     def construct_far_droplet(self, v):
         if self.we.v > abs(self.ww.v):
             if self.wn.v > abs(self.ws.v):
