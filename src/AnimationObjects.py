@@ -45,34 +45,39 @@ class Animation(PygameHelper):
         self.wind_north_label = self.aFont.render('Current northerly wind velocity: %s' % self.wn, 1, (10, 10, 10))
         self.wind_south_label = self.aFont.render('Current southerly wind velocity: %s' % self.ws, 1, (10, 10, 10))
         self.time_label = self.aFont.render('Time: %s s' % self.time, 1, (10, 10, 10))
-        self.screen.blit(self.y_velocity_label, (10,10))
-        self.screen.blit(self.wind_east_label, (10,30))
-        self.screen.blit(self.wind_west_label, (10,50))
-        self.screen.blit(self.wind_north_label, (self.w / 2 + 10,30))
-        self.screen.blit(self.wind_south_label, (self.w / 2 + 10,50))
-        self.screen.blit(self.time_label, (self.w - 150,10))
 
         #drawings
+        self.draw_velocity_label()
+        self.draw_wind_labels()
         self.draw_xy_fountain()
         self.draw_xy_axis()
-        
         self.draw_xz_fountain()
         self.draw_xz_axis()
-        
-        #self.draw_buttons()
-        
         self.draw_lines()
-        
+        self.draw_time_label()
+    
+    #label drawing functions, etc.
     def draw_lines(self):
         pygame.draw.line(self.screen, (0,0,0), (self.w / 2, 0), (self.w / 2, self.h), 2)
         #pygame.draw.line(self.screen, (0,0,0), (0, self.h - 100), (self.w, self.h - 100))
-        
-    def redraw_velocity_label(self):
+    
+    def draw_time_label(self):
+        pygame.draw.rect(self.screen, (255,255,255), (self.w - 150, 10, self.w, 50))
+        self.time_label = self.aFont.render('Time: %s s' % self.time, 1, (10, 10, 10))
+        self.screen.blit(self.time_label, (self.w - 150,10))
+    
+    def draw_velocity_label(self):
         pygame.draw.rect(self.screen, (255,255,255), (10, 10, self.w / 2 - 10, 20))
         self.y_velocity_label = self.aFont.render('Initial y-velocity %s m/s' % self.v, 1, (10, 10, 10))
         self.screen.blit(self.y_velocity_label, (10,10))
-        
-    def redraw_wind_label(self, d):
+    
+    def draw_wind_labels(self):
+        self.draw_wind_label('n')
+        self.draw_wind_label('s')
+        self.draw_wind_label('e')
+        self.draw_wind_label('w')
+    
+    def draw_wind_label(self, d):
         if d == 'n':
             pygame.draw.rect(self.screen, (255,255,255), (self.w / 2 + 10, 30, self.w - 10, 20))
             self.wind_north_label = self.aFont.render('Current northerly wind velocity: %s' % self.wn, 1, (10, 10, 10))
@@ -133,7 +138,7 @@ class Animation(PygameHelper):
                     self.wn = Wind(uniform(6, 8), float(randint(2, 4)))
                 else:
                     self.wn = Wind(uniform(0, 2), float(randint(15, 20)))
-                self.redraw_wind_label('n')
+                self.draw_wind_label('n')
                 wind_did_change = True
         if self.wind_enabled['s']:
             self.ws.duration -= self.dt
@@ -142,7 +147,7 @@ class Animation(PygameHelper):
                     self.ws = Wind(uniform(6, 8), float(randint(2, 4)))
                 else:
                     self.ws = Wind(-uniform(0, 2), float(randint(15, 20)))
-                self.redraw_wind_label('s')
+                self.draw_wind_label('s')
                 wind_did_change = True
 
         return wind_did_change
@@ -184,7 +189,7 @@ class Animation(PygameHelper):
                     self.we = Wind(uniform(6, 8), float(randint(2, 4)))
                 else:
                     self.we = Wind(uniform(0, 2), float(randint(15, 20)))
-                self.redraw_wind_label('e')
+                self.draw_wind_label('e')
                 wind_did_change = True
         if self.wind_enabled['w']:
             self.ww.duration -= self.dt
@@ -193,14 +198,13 @@ class Animation(PygameHelper):
                     self.ww = Wind(uniform(6, 8), float(randint(2, 4)))
                 else:
                     self.ww = Wind(-uniform(0, 2), float(randint(15, 20)))
-                self.redraw_wind_label('w')
+                self.draw_wind_label('w')
                 wind_did_change = True
                 
         return wind_did_change
 
     #fountain control algorithm
     def adjust_initial_droplet_velocity(self):
-        
         vt = 2.06
         g = 9.8
         target_dist = 5.0        
@@ -208,11 +212,17 @@ class Animation(PygameHelper):
 
         sew = self.we + self.ww
         sns = self.wn + self.ws
-        x = Numerical.get_velocity(vt, g, droplet.xs, sew, (sew/abs(sew))*target_dist)
-        z = Numerical.get_velocity(vt, g, droplet.zs, sns, (sns/abs(sns))*target_dist)
+        sew_sign = cmp(sew, 0)
+        sns_sign = cmp(sns, 0)
+        if sew_sign == 0:
+            sew_sign = 1
+        if sns_sign == 0:
+            sns_sign = 1
+        x = Numerical.get_velocity(vt, g, droplet.xs, sew, sew_sign*target_dist)
+        z = Numerical.get_velocity(vt, g, droplet.zs, sns, sns_sign*target_dist)
         self.v = min(x, z, 100)
         
-        self.redraw_velocity_label()
+        self.draw_velocity_label()
 
     def construct_far_droplet(self, v):
         if self.we.v > abs(self.ww.v):
@@ -228,15 +238,13 @@ class Animation(PygameHelper):
 
     #pygame
     def update(self):
+        self.time += self.dt
+        self.draw_wind_labels()
         self.draw_xz_fountain()
         self.draw_xz_axis()
         self.draw_xy_axis()
         self.draw_lines()
-    
-        self.time += self.dt
-        pygame.draw.rect(self.screen, (255,255,255), (self.w - 150, 10, self.w, 50))
-        self.time_label = self.aFont.render('Time: %s s' % self.time, 1, (10, 10, 10))
-        self.screen.blit(self.time_label, (self.w - 150,10))
+        self.draw_time_label()
         
         x_wind_did_change = self.update_x_wind()
         z_wind_did_change = self.update_z_wind()
@@ -275,7 +283,7 @@ class Animation(PygameHelper):
                 self.wn = Wind(0, 1)
             else:
                 self.wn = Wind(0, float('inf'))
-            self.redraw_wind_label('n')
+            self.draw_wind_label('n')
             print 'Northern Winds %s' % ('Enabled' if toggle else 'Disabled')
         if key == K_s:
             toggle = not self.wind_enabled['s']
@@ -284,7 +292,7 @@ class Animation(PygameHelper):
                 self.ws = Wind(0, 1)
             else:
                 self.ws = Wind(0, float('inf'))
-            self.redraw_wind_label('s')
+            self.draw_wind_label('s')
             print 'Southern Winds %s' % ('Enabled' if toggle else 'Disabled')
         if key == K_e:
             toggle = not self.wind_enabled['e']
@@ -293,7 +301,7 @@ class Animation(PygameHelper):
                 self.we = Wind(0, 1)
             else:
                 self.we = Wind(0, float('inf'))
-            self.redraw_wind_label('e')
+            self.draw_wind_label('e')
             print 'Eastern Winds %s' % ('Enabled' if toggle else 'Disabled')
         if key == K_w:
             toggle = not self.wind_enabled['w']
@@ -302,7 +310,7 @@ class Animation(PygameHelper):
                 self.ww = Wind(0, 1)
             else:
                 self.ww = Wind(0, float('inf'))
-            self.redraw_wind_label('w')
+            self.draw_wind_label('w')
             print 'Western Winds %s' % ('Enabled' if toggle else 'Disabled')
 
 
