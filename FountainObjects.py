@@ -27,10 +27,10 @@ class Droplet():
         return -.2102040816*e**(-4.757281553*t)*(self.ys+2.060000000)-2.060000000*t+.2102040816*self.ys+.4330204082 + self.yp
 
     def x(self, t, we, ww):
-        return -.7812500000*e**(-1.280000000*t)*(self.xs-.7812500000*we-.7812500000*ww)+(.7812500000*we+.7812500000*ww)*t+.7812500000*self.xs-.6103515625*we-.6103515625*ww + self.xp
+        return -.2102040816*e**(-4.757281553*t)*(self.xs-1.*we-1.*ww)+(we+ww)*t+self.xp+.2102040816*self.xs-.2102040816*we-.2102040816*ww
     
     def z(self, t, wn, ws):
-        return -.7812500000*e**(-1.280000000*t)*(self.zs-.7812500000*wn-.7812500000*ws)+(.7812500000*wn+.7812500000*ws)*t+.7812500000*self.zs-.6103515625*wn-.6103515625*ws + self.zp
+        return -.2102040816*e**(-4.757281553*t)*(self.zs-1.*wn-1.*ws)+(wn+ws)*t+self.zp+.2102040816*self.zs-.2102040816*wn-.2102040816*ws
 
 class Wind():
 
@@ -40,6 +40,16 @@ class Wind():
 
     def __str__(self):
         return '%s m/s' % self.v
+        
+    def __add__(self, other):
+        return self.v + other
+        
+    __radd__ = __add__
+    
+    def __sub__(self, other):
+        return self.v - other
+        
+    __rsub__ = __sub__
 
     def __neg__(self):
         return -self.v

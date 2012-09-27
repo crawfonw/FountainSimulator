@@ -218,7 +218,7 @@ class Animation(PygameHelper):
             self.adjust_initial_droplet_velocity()
         
         if len(self.droplets) < self.max_drops:
-            new_d = Droplet(uniform(-2, 2), self.v, uniform(-2, 2))
+            new_d = Droplet(uniform(-5, 5), self.v, uniform(-5, 5))
             self.draw_xy_droplet(vec2d(0,0), new_d.pos)
             self.droplets.append(new_d)
         for d in self.droplets:
