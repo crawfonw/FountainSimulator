@@ -210,7 +210,7 @@ class Animation(PygameHelper):
         sns = self.wn + self.ws
         x = Numerical.get_velocity(vt, g, droplet.xs, sew, (sew/abs(sew))*target_dist)
         z = Numerical.get_velocity(vt, g, droplet.zs, sns, (sns/abs(sns))*target_dist)
-        self.v = min(x, z)
+        self.v = min(x, z, 100)
         
         self.redraw_velocity_label()
 

@@ -28,5 +28,3 @@ def get_velocity(vt, g, vx, wx, d):
         print 'Water will never reach the given distance before it hits the ground.'
         return float('inf')
     return bisection(y,0,500,10**(-10))
-    
-print get_velocity(2.06, 9.8, 4, 1, 1)
