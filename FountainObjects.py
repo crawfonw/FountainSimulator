@@ -1,7 +1,6 @@
 from vec import vec3d
 from math import e
 
-
 class Droplet():
 
     def __init__(self, xs, ys, zs):

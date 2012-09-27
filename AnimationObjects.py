@@ -8,6 +8,8 @@ from vec import vec2d, vec3d
 from math import e, pi, cos, sin, sqrt
 from random import uniform, randint
 
+import Numerical
+
 class Animation(PygameHelper):
 
     def __init__(self, w, h, v):
@@ -190,14 +192,55 @@ class Animation(PygameHelper):
         return wind_did_change
 
     def adjust_initial_droplet_velocity(self):
+        
+        droplet = self.construct_far_droplet(self.v)
+        self.v = Numerical.get_velocity(2.06, 9.8, droplet.xs, self.we, 5.0)
+        
+        self.redraw_velocity_label()
+
+    def adjust_initial_droplet_velocity2(self):
         '''
         This is the compensation algoritm. It adjusts the fountain's spray speed,
         specifically the initial y-velocity of the droplets, so people don't get
         sprayed.
         '''
+        print 'Here'
+        max_xz_displacement = 3.0
+        droplet = self.construct_far_droplet(self.v)
+        best_guess = self.v
+        
+        x = max(abs(droplet.x(droplet.tx + 1.0, self.we, self.ww)), abs(droplet.x(droplet.tx + 5.0, self.we, self.ww)), abs(droplet.x(droplet.tx + 10.0, self.we, self.ww)))
+        z = droplet.z(droplet.tz, self.wn, self.ws)
+        
+        print x, z
+        
+        if abs(x) > max_xz_displacement or abs(z) > max_xz_displacement:
+            print 'In the if'
+            c = 50.0
+            while True:
+                y = droplet.y(droplet.ty + c)
+                print 'Loooop, y=', y, best_guess
+                if y > 5.0:
+                    best_guess *= 0.75
+                    droplet = self.construct_far_droplet(best_guess)
+                    c -= 1.0
+                else:
+                    break
+        
+        self.v = best_guess
         self.redraw_velocity_label()
-        return
-            
+    
+    def construct_far_droplet(self, v):
+        if self.we.v > abs(self.ww.v):
+            if self.wn.v > abs(self.ws.v):
+                return Droplet(5, v, 5)
+            else:
+                return Droplet(5, v, -5)
+        else:
+            if self.wn.v > abs(self.ws.v):
+                return Droplet(-5, v, 5)
+            else:
+                return Droplet(-5, v, -5)
 
     #pygame
     def update(self):
